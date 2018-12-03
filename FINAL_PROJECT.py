@@ -34,7 +34,8 @@ for f in images:
 bands = ";".join(results)
 
 arcpy.AddMessage(images)
-arcpy.CompositeBands_management(bands, "compbands.tif")
+arcpy.CompositeBands_management(bands,
+                                os.path.join(output_folder, "compbands.tif"))
 
 
 """ This tool didn't work
