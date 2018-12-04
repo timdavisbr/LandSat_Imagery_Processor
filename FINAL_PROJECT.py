@@ -19,6 +19,8 @@ from tool_utils import banded
 
 zipfile = arcpy.GetParameterAsText(0)
 output_folder = arcpy.GetParameterAsText(1)
+clip_extent = arcpy.GetParameterAsText(2)
+xy_tolerance = ("")
 
 tf = tarfile.open(zipfile, 'r:gz')
 tf.extractall()
@@ -37,13 +39,13 @@ arcpy.AddMessage(images)
 arcpy.CompositeBands_management(bands,
                                 os.path.join(output_folder, "compbands.tif"))
 
+arcpy.Clip_analysis(os.path.join(output_folder, "compbands.tif"), clip_extent, os.path.join(output_folder, "clip_composit.tif"), xy_tolerance)
 
-""" This tool didn't work
-ERROR 999999: Error executing function.
-The table name is invalid.
-No spatial reference exists.
-The table was not found. [compbands.tif]
-Failed to execute (CompositeBands).
+#arcpy.Clip_analysis(in_features, clip_features, out_feature_class, xy_tolerance)
+
+""" File "L:\TDAVI4633\4 Fall 2018\GISC 3200K - Python\LandSat_Imagery_Processor\FINAL_PROJECT.py", line 42
+    arcpy.Clip_analysis(os.path.join(output_folder, "compbands.tif")), clip_extent, output_folder, xy_tolerance)
+                                                                                                               ^
+SyntaxError: invalid syntax
  Failed to execute (Unzip).
-
 """
