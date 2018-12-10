@@ -4,7 +4,7 @@ Timothy Davis
 tdavi4633@ung.edu
 
 """
-### -Improts- ###
+### -Imports- ###
 
 import arcpy
 import os
