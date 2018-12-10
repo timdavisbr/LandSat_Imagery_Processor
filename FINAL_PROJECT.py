@@ -12,6 +12,8 @@ import sys
 import glob
 import tarfile
 import zipfile
+import shutil
+import time
 from tool_utils import banded
 
 ### -Main Block- ###
@@ -20,13 +22,21 @@ from tool_utils import banded
 zipfile = arcpy.GetParameterAsText(0)
 output_folder = arcpy.GetParameterAsText(1)
 clip_extent = arcpy.GetParameterAsText(2)
-xy_tolerance = ("")
+
 
 tf = tarfile.open(zipfile, 'r:gz')
-tf.extractall()
+TEMP = os.path.join(output_folder, 'temp')
+if not os.path.isdir(TEMP):
+    os.mkdir(TEMP)
+else:
+    shutil.rmtree(TEMP)
+    time.sleep(1)
+    os.mkdir(TEMP)
 
+tf.extractall(TEMP)
 
-images = glob.glob('*.tif')
+images = glob.glob(os.path.join(TEMP, '*.tif'))
+arcpy.AddMessage(images)
 
 results = []
 for f in images:
@@ -35,25 +45,31 @@ for f in images:
         results = sorted(results, key=banded)
 bands = ";".join(results)
 
-arcpy.AddMessage(images)
+ 
+
 arcpy.CompositeBands_management(bands,
                                 os.path.join(output_folder, "compbands.tif"))
 
-arcpy.Clip_analysis(os.path.join(output_folder, "compbands.tif"), clip_extent, os.path.join(output_folder, "clip_composit.tif"), xy_tolerance)
+arcpy.Clip_management(os.path.join(output_folder, "compbands.tif"),
+                      "#", 
+                      os.path.join(output_folder, "clip_composit.tif"),
+                      clip_extent,
+                      "#", "ClippingGeometry", "NO_MAINTAIN_EXTENT")
 
-#arcpy.Clip_analysis(in_features, clip_features, out_feature_class, xy_tolerance)
+# Clip_management (in_raster, rectangle, out_raster,
+# {in_template_dataset}, {nodata_value}, {clipping_geometry}, {maintain_clipping_extent})
 
-""" Traceback (most recent call last):
-  File "L:\TDAVI4633\4 Fall 2018\GISC 3200K - Python\LandSat_Imagery_Processor\FINAL_PROJECT.py", line 42, in <module>
-    arcpy.Clip_analysis(os.path.join(output_folder, "compbands.tif"), clip_extent, os.path.join(output_folder, "clip_composit.tif"), xy_tolerance)
-  File "c:\program files\arcgis\pro\Resources\arcpy\arcpy\analysis.py", line 63, in Clip
-    raise e
-  File "c:\program files\arcgis\pro\Resources\arcpy\arcpy\analysis.py", line 60, in Clip
-    retval = convertArcObjectToPythonObject(gp.Clip_analysis(*gp_fixargs((in_features, clip_features, out_feature_class, cluster_tolerance), True)))
-  File "c:\program files\arcgis\pro\Resources\arcpy\arcpy\geoprocessing\_base.py", line 506, in <lambda>
-    return lambda *args: val(*gp_fixargs(args, True))
-arcgisscripting.ExecuteError: Failed to execute. Parameters are not valid.
- ERROR 000732: Input Features: Dataset L:\TDAVI4633\4 Fall 2018\GISC 3200K - Python\Python\compbands.tif does not exist or is not supported
-Failed to execute (Clip).s
- Failed to execute (Unzip).
-"""
+
+
+shutil.rmtree(TEMP)
+
+
+
+
+
+
+
+
+
+
+
